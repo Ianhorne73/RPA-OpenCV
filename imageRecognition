@@ -1,0 +1,36 @@
+'''
+This function attempts to find the centre coordinates for the needle in the haystack
+img_name = the image of the needle -> must be .png
+threshold = the minimum threshold confidence level for the match 
+'''
+
+import cv2 as cv
+import numpy as np
+import pyautogui as pag
+
+def locateCentre(img_name, threshold=1):
+    haystack = pag.screenshot()
+    haystack = np.array(haystack)
+    haystack = cv.cvtColor(haystack, cv.COLOR_RGB2BGR)
+
+    needle = cv.imread(img_name)
+    needle = cv.cvtColor(np.array(needle), cv.COLOR_RGB2BGR)
+
+    result = cv.matchTemplate(haystack, needle, cv.TM_CCOEFF_NORMED)
+
+    min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
+
+    needleW = needle.shape[1]
+    needleH = needle.shape[0]
+    topLeft = max_loc
+    centre = (topLeft[0] + int(needleW/2), topLeft[1] + int(needleH/2)) #center of needle
+    
+    # cv.drawMarker(screenshot, centre, color=(255,0,255), markerType=cv.MARKER_CROSS, thickness=4)
+    # cv.imshow('Computer Vision', screenshot)
+    # cv.waitKey()
+    # cv.destroyAllWindows()
+
+    if max_val > threshold:
+        return centre
+    else:
+        print(f'Image not found, confidence threshold: {max_val}')
